@@ -12,7 +12,8 @@ export async function getAllBills() {
 }
 
 export async function getBillById(id: number) {
-  return db.select().from(bills).where(eq(bills.id, id)).limit(1);
+  const result = await db.select().from(bills).where(eq(bills.id, id)).limit(1);
+  return result[0];
 }
 
 export async function updateBill(

@@ -8,8 +8,9 @@ import {
 
 export async function createItem(data: {
   name: string;
-  price: number;
+  unitPrice: string;
   billId: number;
+  quantity: number;
 }) {
   return dbCreateItem(data);
 }
