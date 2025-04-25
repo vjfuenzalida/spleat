@@ -1,12 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import {
-  dbCreateItem,
-  dbDeleteItem,
-  dbUpdateItem,
-  dbGetItemById,
-} from "@/services/items";
+import { dbCreateItem, dbDeleteItem, dbUpdateItem } from "@/services/items";
 import { ActionResult } from "@/types/actions";
 
 const itemSchema = z.object({
@@ -30,9 +25,12 @@ export async function createItemAction(
   try {
     await dbCreateItem(parsed.data);
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error al crear ítem:", err);
-    return { success: false, error: "No se pudo guardar el ítem. Intenta nuevamente." };
+    return {
+      success: false,
+      error: "No se pudo guardar el ítem. Intenta nuevamente.",
+    };
   }
 }
 
@@ -50,7 +48,7 @@ export async function updateItemAction(
   try {
     await dbUpdateItem(id, parsed.data);
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error al actualizar ítem:", err);
     return { success: false, error: "No se pudo actualizar el ítem." };
   }
@@ -60,7 +58,7 @@ export async function deleteItemAction(id: number): Promise<ActionResult> {
   try {
     await dbDeleteItem(id);
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error al eliminar ítem:", err);
     return { success: false, error: "No se pudo eliminar el ítem." };
   }

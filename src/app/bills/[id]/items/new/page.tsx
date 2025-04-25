@@ -28,7 +28,7 @@ export default function NewItemPage({ params }: { params: Promise<{ id: string }
       toast.success("Item creado con éxito 🎉");
       router.push(`/bills/${billId}`);
     }
-  }, [state.success, router]);
+  }, [state.success, router, billId]);
 
   return (
     <div className="max-w-md mx-auto p-6 space-y-6">

@@ -19,18 +19,18 @@ export function ParticipantForm({ billId }: { billId: number }) {
     initialState
   );
   const router = useRouter();
-  const [_, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (state.success) {
-      toast.success("Participante agregado");
+      toast.success("Participante agregado");   
       startTransition(() => {
         router.refresh();
       });
     } else if (state.error) {
       toast.error(state.error);
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form action={formAction} className="flex gap-2">

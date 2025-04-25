@@ -26,7 +26,7 @@ export async function createBillAction(
     });
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error al crear boleta:", err);
     return { success: false, error: "No se pudo crear la boleta." };
   }

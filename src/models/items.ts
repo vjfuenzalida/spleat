@@ -1,5 +1,5 @@
 // src/models/items.ts
-import { pgTable, serial, text, numeric, integer, real } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, real } from "drizzle-orm/pg-core";
 import { bills } from "./bills";
 
 export const items = pgTable("items", {

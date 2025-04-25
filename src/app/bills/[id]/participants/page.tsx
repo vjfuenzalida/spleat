@@ -1,14 +1,8 @@
 import { ParticipantForm } from "@/components/ParticipantForm";
 import { ParticipantList } from "@/components/ParticipantList";
-import { ActionResult } from "@/types/actions";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-
-const initialState: ActionResult = {
-  success: false,
-  error: "",
-};
 
 export default function ManageParticipantsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = React.use(params);

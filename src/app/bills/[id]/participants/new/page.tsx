@@ -28,7 +28,7 @@ export default function NewParticipantPage({ params }: { params: Promise<{ id: s
       toast.success("Participante creado con éxito 🎉");
       router.push(`/bills/${billId}`);
     }
-  }, [state.success, router]);
+  }, [state.success, router, billId]);
 
   return (
     <div className="max-w-md mx-auto p-6 space-y-6">
