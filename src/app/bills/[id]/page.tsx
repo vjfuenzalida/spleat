@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
 import { getBillAction } from "@/actions/bills";
 import { dbGetItemsByBillId } from "@/services/items";
 import { CompactItemCard } from "@/components/CompactItemCard";
@@ -45,7 +45,9 @@ export default async function BillPage({
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{bill.name}</h1>
         <Button asChild>
-          <Link href={`/bills/${bill.id}/items/new`}>＋</Link>
+          <Link href={`/bills/${bill.id}/participants`}>
+            <Settings className="w-4 h-4" />
+          </Link>
         </Button>
       </div>
 
@@ -77,6 +79,14 @@ export default async function BillPage({
           ))
         )}
       </div>
+      <Link href={`/bills/${bill.id}/items/new`}>
+        <Button
+          size="icon"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg text-2xl p-0"
+        >
+          ＋
+        </Button>
+      </Link>
     </div>
   );
 }
