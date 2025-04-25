@@ -1,0 +1,1 @@
+ALTER TABLE "items" ALTER COLUMN "unit_price" SET DATA TYPE real;

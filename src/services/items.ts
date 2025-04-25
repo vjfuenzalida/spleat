@@ -1,33 +1,28 @@
-// src/services/items.ts
 import { db } from "@/db/drizzle";
 import { items } from "@/models/items";
-
 import { eq } from "drizzle-orm";
 
-// Insert a new item
-export async function createItem(data: typeof items.$inferInsert) {
-  return db.insert(items).values(data).returning();
+export async function dbCreateItem(data: typeof items.$inferInsert) {
+  const [newItem] = await db.insert(items).values(data).returning();
+  return newItem;
 }
 
-// Get all items
-export async function getAllItems() {
-  return db.select().from(items);
+export async function dbGetItemById(id: number) {
+  const [item] = await db.select().from(items).where(eq(items.id, id));
+  return item ?? null;
 }
 
-// Get item by ID
-export async function getItemById(id: number) {
-  return db.select().from(items).where(eq(items.id, id)).limit(1);
+export async function dbGetItemsByBillId(billId: number) {
+  return db.select().from(items).where(eq(items.billId, billId));
 }
 
-// Update item
-export async function updateItem(
+export async function dbUpdateItem(
   id: number,
   data: Partial<typeof items.$inferInsert>
 ) {
-  return db.update(items).set(data).where(eq(items.id, id));
+  return db.update(items).set(data).where(eq(items.id, id)).returning();
 }
 
-// Delete item
-export async function deleteItem(id: number) {
+export async function dbDeleteItem(id: number) {
   return db.delete(items).where(eq(items.id, id));
 }

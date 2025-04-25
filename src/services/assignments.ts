@@ -1,24 +1,35 @@
-// src/services/assignments.ts
 import { db } from "@/db/drizzle";
 import { assignments } from "@/models/assignments";
 import { eq } from "drizzle-orm";
 
-export async function createAssignment(data: typeof assignments.$inferInsert) {
-  return db.insert(assignments).values(data).returning();
+export async function dbCreateAssignment(data: typeof assignments.$inferInsert) {
+  const [newAssignment] = await db.insert(assignments).values(data).returning();
+  return newAssignment;
 }
 
-export async function getAssignmentsByItem(itemId: number) {
+export async function dbGetAssignmentById(id: number) {
+  const [assignment] = await db
+    .select()
+    .from(assignments)
+    .where(eq(assignments.id, id));
+  return assignment ?? null;
+}
+
+export async function dbGetAssignmentsByItemId(itemId: number) {
   return db.select().from(assignments).where(eq(assignments.itemId, itemId));
 }
 
-export async function getAssignmentsByParticipant(participantId: number) {
+export async function dbGetAssignmentsByParticipantId(participantId: number) {
   return db.select().from(assignments).where(eq(assignments.participantId, participantId));
 }
 
-export async function updateAssignment(id: number, data: Partial<typeof assignments.$inferInsert>) {
-  return db.update(assignments).set(data).where(eq(assignments.id, id));
+export async function dbUpdateAssignment(
+  id: number,
+  data: Partial<typeof assignments.$inferInsert>
+) {
+  return db.update(assignments).set(data).where(eq(assignments.id, id)).returning();
 }
 
-export async function deleteAssignment(id: number) {
+export async function dbDeleteAssignment(id: number) {
   return db.delete(assignments).where(eq(assignments.id, id));
 }
