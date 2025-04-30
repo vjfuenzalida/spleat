@@ -63,7 +63,7 @@ export async function updateItemAction(
   const { id, name, unitPrice, quantity, splitMode } = parsed;
 
   const assignments: NewAssignment[] = [];
-  for (const [key, _value] of formData.entries()) {
+  for (const [key] of formData.entries()) {
     if (key.startsWith("quantity_")) {
       const pid = Number(key.replace("quantity_", ""));
       assignments.push({ itemId: id, participantId: pid });
