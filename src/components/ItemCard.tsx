@@ -1,4 +1,3 @@
-// src/components/ItemCard.tsx
 import type { Item } from "@/services/items";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";

@@ -6,8 +6,8 @@ interface NewItemPageProps {
   params: Promise<{ billId: string }>;
 }
 
-export default function NewItemPage({ params }: NewItemPageProps) {
-  const { billId: id } = React.use(params);
+export default async function NewItemPage({ params }: NewItemPageProps) {
+  const { billId: id } = await params;
   const billId = parseInt(id, 10);
 
   return (

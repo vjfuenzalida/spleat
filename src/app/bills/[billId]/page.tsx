@@ -29,11 +29,9 @@ export default async function BillPage({ params }: BillPageProps) {
       <div className="mb-2">
         <BackButton href={'/bills'} title="Volver a boletas"/>
       </div>
-
-      {/* Header with title and settings button */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">{bill.name}</h1>
-        <Link href={`/bills/${bill.id}/participants`}>
+        <Link href={`/bills/${bill.id}/settings`}>
           <Settings className="w-6 h-6 text-muted-foreground hover:text-foreground transition-colors" />
         </Link>
       </div>

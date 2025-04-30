@@ -1,4 +1,3 @@
-// src/models/participants.ts
 import { pgTable, serial, text, integer } from "drizzle-orm/pg-core";
 import { bills } from "./bills";
 

@@ -1,108 +1,152 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { updateItemAction } from "@/actions/items";
+import { toast } from "sonner";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { ActionResult } from "@/types/actions";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import { SplitMode } from "@/models/items";
-import { Item } from "@/services/items";
+import { updateItemAction } from "@/actions/items";
+import { ActionResult } from "@/types/actions";
+
+import type { Participant } from "@/services/participants";
+import type { Assignment } from "@/services/assignments";
+import type { Item } from "@/services/items";
+import { EqualSplitTab } from "./split/EqualSplitTab";
 import { normalizeNumericInput } from "@/lib/formatters";
 
-const initialState: ActionResult = {
-  success: false,
-  error: "",
-};
-
-interface ItemEditFormProps {
+interface Props {
   billId: number;
   item: Item;
+  participants: Participant[];
+  assignments: Assignment[];
 }
 
-export function ItemEditForm({ billId, item }: ItemEditFormProps) {
-  const [state, formAction, isPending] = useActionState(
+const initialState: ActionResult = { success: false, error: "" };
+
+export function ItemEditForm({ billId, item, participants, assignments }: Props) {
+  const router = useRouter();
+
+  const [actionState, formAction, isPending] = useActionState(
     updateItemAction,
     initialState
   );
-  const router = useRouter();
+
+  const [name, setName] = useState(item.name);
+  const [unitPrice, setUnitPrice] = useState(item.unitPrice.toString());
+  const [quantity, setQuantity] = useState(item.quantity.toString());
+
+  const [included, setIncluded] = useState<Set<number>>(() =>
+    new Set(assignments.map((a) => a.participantId))
+  );
+
+  const toggleInclude = (id: number) =>
+    setIncluded((s) => {
+      const next = new Set(s);
+      s.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const qtyTotal = parseFloat(quantity || "0");
+  const perPerson = useMemo(() => {
+    if (included.size === 0) return 0;
+    return Math.floor(qtyTotal / included.size);
+  }, [qtyTotal, included]);
 
   useEffect(() => {
-    if (state.success) {
-      toast.success("Ítem actualizado con éxito");
+    if (actionState.success) {
+      toast.success("Ítem actualizado");
       router.push(`/bills/${billId}`);
-    } else if (state.error) {
-      toast.error(state.error);
+    } else if (actionState.error) {
+      toast.error(actionState.error);
     }
-  }, [state, router, billId]);
+  }, [actionState, router, billId]);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="flex flex-col h-full space-y-6">
       <input type="hidden" name="id" value={item.id} />
       <input type="hidden" name="billId" value={billId} />
+      <input type="hidden" name="splitMode" value={SplitMode.EQUAL} />
 
-      <div className="space-y-2">
-        <Label htmlFor="name">Nombre</Label>
-        <Input
-          id="name"
-          name="name"
-          defaultValue={item.name}
-          required
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <Label htmlFor="name">Nombre</Label>
+          <Input
+            id="name"
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="unitPrice">Precio unitario</Label>
+          <Input
+            id="unitPrice"
+            name="unitPrice"
+            type="number"
+            step="0.01"
+            min="0"
+            value={normalizeNumericInput(unitPrice)}
+            onChange={(e) => setUnitPrice(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="quantity">Cantidad total</Label>
+          <Input
+            id="quantity"
+            name="quantity"
+            type="number"
+            step="1"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col flex-1">
+        <div className="mb-2 text-sm font-medium">Partes iguales</div>
+        <EqualSplitTab
+          participants={participants}
+          included={included}
+          onToggle={toggleInclude}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="unitPrice">Precio unitario</Label>
-        <Input
-          id="unitPrice"
-          name="unitPrice"
-          type="number"
-          step="0.01"
-          min="0"
-          defaultValue={normalizeNumericInput(item.unitPrice)}
-          required
+      <div className="pt-2 border-t border-border">
+        {included.size > 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {perPerson} unidad{perPerson !== 1 ? "es" : ""} c/u (
+            {included.size} {included.size > 1 ? "personas" : "persona"})
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Selecciona al menos una persona
+          </p>
+        )}
+      </div>
+
+      {Array.from(included).map((pid) => (
+        <input
+          key={pid}
+          type="hidden"
+          name={`quantity_${pid}`}
+          value={perPerson.toString()}
         />
-      </div>
+      ))}
 
-      <div className="space-y-2">
-        <Label htmlFor="quantity">Cantidad</Label>
-        <Input
-          id="quantity"
-          name="quantity"
-          type="number"
-          step="1"
-          min="1"
-          defaultValue={item.quantity}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="splitMode">Modo de división</Label>
-        <Select name="splitMode" required defaultValue={item.splitMode}>
-          <SelectTrigger id="splitMode">
-            <SelectValue placeholder="Selecciona un modo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={SplitMode.EQUAL}>Partes iguales</SelectItem>
-            <SelectItem value={SplitMode.QUANTITY}>Por cantidad</SelectItem>
-            <SelectItem value={SplitMode.SHARES}>Partes personalizadas</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Button type="submit" disabled={isPending} className="w-full">
-        {isPending ? "Guardando cambios..." : "Actualizar ítem"}
+      <Button
+        type="submit"
+        disabled={isPending || included.size === 0}
+        className="w-full"
+      >
+        {isPending ? "Guardando…" : "Guardar ítem"}
       </Button>
     </form>
   );

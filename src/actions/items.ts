@@ -4,10 +4,11 @@ import { z } from "zod";
 import { SplitMode } from "@/models/items";
 import {
   dbCreateItem,
-  dbUpdateItem,
   dbDeleteItem,
+  updateItemWithAssignments,
 } from "@/services/items";
 import { ActionResult } from "@/types/actions";
+import { NewAssignment } from "@/services/assignments";
 
 const createItemSchema = z.object({
   billId: z.coerce.number().int(),
@@ -43,18 +44,33 @@ export async function updateItemAction(
   _: unknown,
   formData: FormData
 ): Promise<ActionResult> {
-  const data = Object.fromEntries(formData.entries());
-  const parsed = updateItemSchema.safeParse(data);
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
-  }
+  const flat = Object.fromEntries(formData.entries());
+  let parsed;
   try {
-    const { id, ...rest } = parsed.data;
-    await dbUpdateItem(id, rest);
+    parsed = updateItemSchema.parse(flat);
+  } catch (e: any) {
+    return { success: false, error: e.message };
+  }
+
+  const { id, name, unitPrice, quantity, splitMode } = parsed;
+
+  const assignments: NewAssignment[] = [];
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("quantity_")) {
+      const pid = Number(key.replace("quantity_", ""));
+      assignments.push({ itemId: id, participantId: pid });
+    }
+  }
+
+  try {
+    await updateItemWithAssignments(
+      id,
+      { name, unitPrice, quantity, splitMode },
+      assignments
+    );
     return { success: true };
   } catch (err: any) {
-    console.error("Error al actualizar ítem:", err);
-    return { success: false, error: "No se pudo actualizar el ítem." };
+    return { success: false, error: err.message || "Error al actualizar ítem" };
   }
 }
 
