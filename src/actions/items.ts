@@ -34,9 +34,13 @@ export async function createItemAction(
   try {
     await dbCreateItem(parsed.data);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al crear ítem:", err);
-    return { success: false, error: "No se pudo crear el ítem." };
+  } catch (error: unknown) {
+    console.error("Error al crear item:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
 
@@ -69,8 +73,13 @@ export async function updateItemAction(
       assignments
     );
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "Error al actualizar ítem" };
+  } catch (error: unknown) {
+    console.error("Error al actualizar item:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
 
@@ -78,8 +87,12 @@ export async function deleteItemAction(id: number): Promise<ActionResult> {
   try {
     await dbDeleteItem(id);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al eliminar ítem:", err);
-    return { success: false, error: "No se pudo eliminar el ítem." };
+  } catch (error: unknown) {
+    console.error("Error al eliminar item:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }

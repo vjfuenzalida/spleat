@@ -11,14 +11,8 @@ import { ActionResult } from "@/types/actions";
 const createAssignmentSchema = z.object({
   itemId: z.coerce.number().int(),
   participantId: z.coerce.number().int(),
-  quantity: z
-    .coerce.number()
-    .min(0, "Cantidad inválida")
-    .optional(),
-  shares: z
-    .coerce.number()
-    .min(0, "Shares inválidos")
-    .optional(),
+  quantity: z.coerce.number().min(0, "Cantidad inválida").optional(),
+  shares: z.coerce.number().min(0, "Shares inválidos").optional(),
 });
 
 const updateAssignmentSchema = createAssignmentSchema.extend({
@@ -37,9 +31,13 @@ export async function createAssignmentAction(
   try {
     await dbCreateAssignment(parsed.data);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al crear asignación:", err);
-    return { success: false, error: "No se pudo crear la asignación." };
+  } catch (error: unknown) {
+    console.error("Error al crear asignación:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
 
@@ -56,9 +54,13 @@ export async function updateAssignmentAction(
     const { id, ...rest } = parsed.data;
     await dbUpdateAssignment(id, rest);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al actualizar asignación:", err);
-    return { success: false, error: "No se pudo actualizar la asignación." };
+  } catch (error: unknown) {
+    console.error("Error al actualizar asignación:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
 
@@ -68,8 +70,12 @@ export async function deleteAssignmentAction(
   try {
     await dbDeleteAssignment(id);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al eliminar asignación:", err);
-    return { success: false, error: "No se pudo eliminar la asignación." };
+  } catch (error: unknown) {
+    console.error("Error al eliminar asignación:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }

@@ -29,9 +29,13 @@ export async function createParticipantAction(
   try {
     await dbCreateParticipant(parsed.data);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al crear participante:", err);
-    return { success: false, error: "No se pudo crear el participante." };
+  } catch (error: unknown) {
+    console.error("Error al crear participante:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
 
@@ -48,9 +52,13 @@ export async function updateParticipantAction(
     const { id, ...rest } = parsed.data;
     await dbUpdateParticipant(id, rest);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al actualizar participante:", err);
-    return { success: false, error: "No se pudo actualizar el participante." };
+  } catch (error: unknown) {
+    console.error("Error al actualizar participante:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
 
@@ -60,8 +68,12 @@ export async function deleteParticipantAction(
   try {
     await dbDeleteParticipant(id);
     return { success: true };
-  } catch (err: any) {
-    console.error("Error al eliminar participante:", err);
-    return { success: false, error: "No se pudo eliminar el participante." };
+  } catch (error: unknown) {
+    console.error("Error al eliminar participante:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Se produjo un error desconocido";
+    return { success: false, error: message };
   }
 }
