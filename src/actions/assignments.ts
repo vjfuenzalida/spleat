@@ -3,61 +3,60 @@
 import { z } from "zod";
 import {
   dbCreateAssignment,
-  dbDeleteAssignment,
   dbUpdateAssignment,
-  dbGetAssignmentById,
+  dbDeleteAssignment,
 } from "@/services/assignments";
 import { ActionResult } from "@/types/actions";
 
-const assignmentSchema = z.object({
+const createAssignmentSchema = z.object({
   itemId: z.coerce.number().int(),
   participantId: z.coerce.number().int(),
-  quantity: z.coerce.number().positive(),
+  quantity: z
+    .coerce.number()
+    .min(0, "Cantidad inválida")
+    .optional(),
+  shares: z
+    .coerce.number()
+    .min(0, "Shares inválidos")
+    .optional(),
+});
+
+const updateAssignmentSchema = createAssignmentSchema.extend({
+  id: z.coerce.number().int(),
 });
 
 export async function createAssignmentAction(
   _: unknown,
   formData: FormData
 ): Promise<ActionResult> {
-  const raw = Object.fromEntries(formData.entries());
-  const parsed = assignmentSchema.safeParse(raw);
-
+  const data = Object.fromEntries(formData.entries());
+  const parsed = createAssignmentSchema.safeParse(data);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0]?.message };
+    return { success: false, error: parsed.error.errors[0].message };
   }
-
   try {
-    await dbCreateAssignment({
-      itemId: parsed.data.itemId,
-      participantId: parsed.data.participantId,
-      quantity: String(parsed.data.quantity),
-    });
+    await dbCreateAssignment(parsed.data);
     return { success: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error al crear asignación:", err);
     return { success: false, error: "No se pudo crear la asignación." };
   }
 }
 
 export async function updateAssignmentAction(
-  id: number,
+  _: unknown,
   formData: FormData
 ): Promise<ActionResult> {
-  const raw = Object.fromEntries(formData.entries());
-  const parsed = assignmentSchema.safeParse(raw);
-
+  const data = Object.fromEntries(formData.entries());
+  const parsed = updateAssignmentSchema.safeParse(data);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0]?.message };
+    return { success: false, error: parsed.error.errors[0].message };
   }
-
   try {
-    await dbUpdateAssignment(id, {
-      itemId: parsed.data.itemId,
-      participantId: parsed.data.participantId,
-      quantity: String(parsed.data.quantity),
-    });
+    const { id, ...rest } = parsed.data;
+    await dbUpdateAssignment(id, rest);
     return { success: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error al actualizar asignación:", err);
     return { success: false, error: "No se pudo actualizar la asignación." };
   }
@@ -69,17 +68,8 @@ export async function deleteAssignmentAction(
   try {
     await dbDeleteAssignment(id);
     return { success: true };
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error al eliminar asignación:", err);
     return { success: false, error: "No se pudo eliminar la asignación." };
-  }
-}
-
-export async function getAssignmentAction(id: number) {
-  try {
-    return await dbGetAssignmentById(id);
-  } catch (err) {
-    console.error("Error al obtener asignación:", err);
-    return null;
   }
 }

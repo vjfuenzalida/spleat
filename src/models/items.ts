@@ -1,6 +1,24 @@
-// src/models/items.ts
-import { pgTable, serial, text, integer, real } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  numeric,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { bills } from "./bills";
+
+export enum SplitMode {
+  QUANTITY = "quantity",
+  EQUAL = "equal",
+  SHARES = "shares",
+} 
+
+export const splitModeEnum = pgEnum("split_mode", [
+  SplitMode.QUANTITY,
+  SplitMode.EQUAL,
+  SplitMode.SHARES,
+]);
 
 export const items = pgTable("items", {
   id: serial("id").primaryKey(),
@@ -8,6 +26,9 @@ export const items = pgTable("items", {
     .references(() => bills.id, { onDelete: "cascade" })
     .notNull(),
   name: text("name").notNull(),
-  unitPrice: real("unit_price").notNull(),
+  unitPrice: numeric("unit_price", { precision: 10, scale: 4 })
+    .notNull()
+    .$type<number>(),
   quantity: integer("quantity").notNull(),
+  splitMode: splitModeEnum("split_mode").notNull(),
 });
