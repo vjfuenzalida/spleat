@@ -46,7 +46,11 @@ export function ItemEditForm({ billId, item, participants, assignments }: Props)
   const toggleInclude = (id: number) =>
     setIncluded((s) => {
       const next = new Set(s);
-      s.has(id) ? next.delete(id) : next.add(id);
+      if (s.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
 

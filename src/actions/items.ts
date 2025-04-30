@@ -52,14 +52,18 @@ export async function updateItemAction(
   let parsed;
   try {
     parsed = updateItemSchema.parse(flat);
-  } catch (e: any) {
-    return { success: false, error: e.message };
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return { success: false, error: error.errors[0].message };
+    }
+    console.error("Error al parsear datos:", error);
+    return { success: false, error: "Error desconocido" };
   }
 
   const { id, name, unitPrice, quantity, splitMode } = parsed;
 
   const assignments: NewAssignment[] = [];
-  for (const [key, value] of formData.entries()) {
+  for (const [key, _value] of formData.entries()) {
     if (key.startsWith("quantity_")) {
       const pid = Number(key.replace("quantity_", ""));
       assignments.push({ itemId: id, participantId: pid });
